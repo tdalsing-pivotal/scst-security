@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: processor
+  profiles:
+    active: local

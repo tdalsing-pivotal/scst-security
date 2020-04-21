@@ -1,0 +1,25 @@
+server:
+  port: 8304
+
+spring:
+  cloud:
+    function:
+      definition: jwtErrorConsumer;signatureErrorConsumer
+    stream:
+      bindings:
+        jwtErrorConsumer-in-0:
+          destination: scst-security-jwt-error
+          contentType: application/json
+          group: error-monitor
+        signatureErrorConsumer-in-0:
+          destination: scst-security-signature-error
+          contentType: application/json
+          group: error-monitor
+
+management:
+  metrics:
+    export:
+      influx:
+        uri: http://localhost:8086
+        db: metrics
+        step: 10s

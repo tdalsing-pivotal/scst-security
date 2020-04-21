@@ -1,0 +1,31 @@
+plugins {
+    id "org.springframework.boot" version "2.2.6.RELEASE"
+    id 'com.google.cloud.tools.jib' version '2.2.0'
+}
+
+apply plugin: 'org.springframework.boot'
+
+dependencies {
+    implementation(project(':common'))
+
+    implementation "org.springframework.boot:spring-boot-starter-web"
+    implementation "org.springframework.cloud:spring-cloud-stream-binder-kafka"
+    implementation "org.springframework.boot:spring-boot-starter-actuator"
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+    implementation 'org.springframework.security:spring-security-oauth2-resource-server'
+    implementation 'org.springframework.security:spring-security-oauth2-client'
+
+    implementation "io.micrometer:micrometer-registry-influx"
+    implementation "org.apache.commons:commons-lang3"
+}
+
+jib {
+    allowInsecureRegistries = true
+    from {
+        image = "openjdk:11"
+    }
+    to {
+        image = "192.168.64.36:5000/scst-security-processor"
+    }
+}
