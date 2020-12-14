@@ -5,6 +5,7 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -17,7 +18,7 @@ import java.util.Base64;
 
 public class GenerateJwt {
 
-//    @Test
+    @Test
     public void generate() throws Exception {
         String publicKeyString = Files.readString(Paths.get("src/main/resources/publicKey"));
         String privateKeyString = Files.readString(Paths.get("src/main/resources/privateKey"));

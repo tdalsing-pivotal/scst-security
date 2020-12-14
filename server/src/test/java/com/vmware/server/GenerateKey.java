@@ -1,5 +1,7 @@
 package com.vmware.server;
 
+import org.junit.jupiter.api.Test;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.*;
@@ -9,7 +11,7 @@ import java.util.Base64;
 
 public class GenerateKey {
 
-//    @Test
+    @Test
     public void generate() throws Exception {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);

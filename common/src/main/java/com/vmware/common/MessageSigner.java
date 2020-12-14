@@ -7,12 +7,11 @@ import io.micrometer.core.instrument.Timer;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
 
 import javax.crypto.Cipher;
 import java.security.KeyFactory;
@@ -25,7 +24,6 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
-import java.util.function.Supplier;
 
 import static java.lang.Boolean.TRUE;
 import static javax.crypto.Cipher.DECRYPT_MODE;
@@ -38,24 +36,26 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class MessageSigner<T> {
 
+    StreamBridge bridge;
     PrivateKey messageSignerPrivateKey;
     PublicKey messageSignerPublicKey;
     Counter messageSignerCounter;
     Counter messageSignerErrorCounter;
     Timer messageSignerVerifyTimer;
     Timer messageSignerSignTimer;
-    EmitterProcessor<Message<T>> emitterProcessor = EmitterProcessor.create();
     ObjectMapper mapper = new ObjectMapper();
     static final Decoder decoder = Base64.getDecoder();
     static final Encoder encoder = Base64.getEncoder();
 
     public MessageSigner(
+            StreamBridge bridge,
             PrivateKey messageSignerPrivateKey,
             PublicKey messageSignerPublicKey,
             Counter messageSignerCounter,
             Counter messageSignerErrorCounter,
             Timer messageSignerVerifyTimer,
             Timer messageSignerSignTimer) {
+        this.bridge = bridge;
         this.messageSignerPrivateKey = messageSignerPrivateKey;
         this.messageSignerPublicKey = messageSignerPublicKey;
         this.messageSignerCounter = messageSignerCounter;
@@ -104,13 +104,7 @@ public class MessageSigner<T> {
         return registry.timer("message-signer-sign-timer");
     }
 
-    @Bean
-    public Supplier<Flux<Message<T>>> signatureErrorSupplier() {
-        log.info("signatureErrorSupplier");
-        return () -> emitterProcessor;
-    }
-
-    public boolean verifyMessageSignature(Message<T> message) {
+    public boolean verifyMessageSignature(Message<T> message, String bindingName) {
         try {
             messageSignerCounter.increment();
 
@@ -121,7 +115,7 @@ public class MessageSigner<T> {
                 Message<T> errorMessage = MessageBuilder.fromMessage(message).setHeader("invalidSignature", TRUE).build();
                 log.error("verifyMessageSignature: invalid signature, sending to error topic: message={}", errorMessage);
                 messageSignerErrorCounter.increment();
-                emitterProcessor.onNext(errorMessage);
+                bridge.send(bindingName, errorMessage);
             }
 
             return validSign;

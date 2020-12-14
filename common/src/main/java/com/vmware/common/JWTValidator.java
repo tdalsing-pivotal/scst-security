@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
@@ -14,10 +15,6 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
-
-import java.util.function.Supplier;
 
 import static java.lang.Boolean.TRUE;
 import static lombok.AccessLevel.PRIVATE;
@@ -27,12 +24,13 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class JWTValidator<T> {
 
+    StreamBridge bridge;
     JwtDecoder jwtDecoder;
     Counter jwtValidatorCounter;
     Counter jwtValidatorErrorCounter;
-    EmitterProcessor<Message<T>> emitterProcessor = EmitterProcessor.create();
 
-    public JWTValidator(JwtDecoder jwtDecoder, Counter jwtValidatorCounter, Counter jwtValidatorErrorCounter) {
+    public JWTValidator(StreamBridge bridge, JwtDecoder jwtDecoder, Counter jwtValidatorCounter, Counter jwtValidatorErrorCounter) {
+        this.bridge = bridge;
         this.jwtDecoder = jwtDecoder;
         this.jwtValidatorCounter = jwtValidatorCounter;
         this.jwtValidatorErrorCounter = jwtValidatorErrorCounter;
@@ -50,12 +48,6 @@ public class JWTValidator<T> {
         return registry.counter("jwt-validator-error-count");
     }
 
-    @Bean
-    public Supplier<Flux<Message<T>>> jwtErrorSupplier() {
-        log.info("jwtErrorSupplier");
-        return () -> emitterProcessor;
-    }
-
     public void populateJwtHeader(MessageBuilder<T> messageBuilder) {
         log.info("populateJwtHeader: messageBuilder={}", messageBuilder);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -65,7 +57,7 @@ public class JWTValidator<T> {
         messageBuilder.setHeader("jwts", jwts);
     }
 
-    public boolean validate(Message<T> message) {
+    public boolean validate(Message<T> message, String bindingName) {
         log.info("validate: message={}", message);
         jwtValidatorCounter.increment();
         String jwts = message.getHeaders().get("jwts", String.class);
@@ -77,7 +69,12 @@ public class JWTValidator<T> {
         } catch (JwtException e) {
             log.error("validate: JWT is invalid: message={}, e={}", message, e.toString(), e);
             jwtValidatorErrorCounter.increment();
-            emitterProcessor.onNext(MessageBuilder.fromMessage(message).setHeader("jwtInvalid", TRUE).setHeader("jwtException", e.toString()).build());
+            Message<T> errorMessage = MessageBuilder
+                    .fromMessage(message)
+                    .setHeader("jwtInvalid", TRUE)
+                    .setHeader("jwtException", e.toString())
+                    .build();
+            bridge.send(bindingName, errorMessage);
             return false;
         }
     }

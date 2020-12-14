@@ -41,8 +41,8 @@ public class ProcessorApp {
             try {
                 log.info("processor: input={}", input);
 
-                boolean validSign = messageSigner.verifyMessageSignature(input);
-                boolean validJwt = validator.validate(input);
+                boolean validSign = messageSigner.verifyMessageSignature(input, "signatureErrorSupplier-out-0");
+                boolean validJwt = validator.validate(input, "jwtErrorSupplier-out-0");
 
                 if (validSign && validJwt) {
                     log.info("processor: JWT and signature is valid: input={}", input);

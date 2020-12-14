@@ -38,8 +38,8 @@ public class ServerApp {
         log.info("consumer");
         return message -> {
             log.info("consumer: message={}", message);
-            boolean validSign = messageSigner.verifyMessageSignature(message);
-            boolean validJwt = jwtValidator.validate(message);
+            boolean validSign = messageSigner.verifyMessageSignature(message, "signatureErrorSupplier-out-0");
+            boolean validJwt = jwtValidator.validate(message, "jwtErrorSupplier-out-0");
 
             if (validSign && validJwt) {
                 log.info("consumer: JWT and signature is valid: message={}", message);

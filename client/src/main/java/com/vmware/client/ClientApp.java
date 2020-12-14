@@ -6,7 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.context.annotation.Import;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.Message;
@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.Flux;
 
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static lombok.AccessLevel.PRIVATE;
 import static org.springframework.http.HttpStatus.ACCEPTED;
@@ -30,12 +27,14 @@ import static org.springframework.http.HttpStatus.ACCEPTED;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class ClientApp {
 
-    EmitterProcessor<Message<Map<String, Object>>> emitterProcessor = EmitterProcessor.create();
+    StreamBridge bridge;
     JWTValidator<Map<String, Object>> jwtValidator;
     MessageSigner<Map<String, Object>> messageSigner;
 
-    public ClientApp(JWTValidator<Map<String, Object>> jwtValidator,
+    public ClientApp(StreamBridge bridge,
+                     JWTValidator<Map<String, Object>> jwtValidator,
                      MessageSigner<Map<String, Object>> messageSigner) {
+        this.bridge = bridge;
         this.jwtValidator = jwtValidator;
         this.messageSigner = messageSigner;
     }
@@ -70,12 +69,6 @@ public class ClientApp {
         Message<Map<String, Object>> message = messageBuilder.build();
         log.info("post: sending message={}", message);
 
-        emitterProcessor.onNext(message);
-    }
-
-    @Bean
-    public Supplier<Flux<Message<Map<String, Object>>>> supplier() {
-        log.info("supplier");
-        return () -> emitterProcessor;
+        bridge.send("supplier-out-0", message);
     }
 }
