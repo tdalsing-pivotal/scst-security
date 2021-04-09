@@ -2,7 +2,7 @@
 
 resp=$(curl -H "Content-Type: application/x-www-form-urlencoded" \
   -d "client_id=spa-heroes" \
-  -d "client_secret=e227337d-a832-40c4-95ea-2fd45a921c08" \
+  -d "client_secret=28c2cc01-3cb4-4266-96c6-57556d742a69" \
   -d "username=jeroen" \
   -d "password=jeroen" \
   -d "grant_type=password" \
