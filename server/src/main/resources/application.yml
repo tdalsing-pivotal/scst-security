@@ -2,11 +2,13 @@ server:
   port: 8302
 
 spring:
+  application:
+    name: server
   security:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: http://localhost:9080/auth/realms/heroes/protocol/openid-connect/certs
+          jwk-set-uri: http://localhost:8080/realms/test-realm/protocol/openid-connect/certs
   cloud:
     function:
       definition: consumer;jwtErrorSupplier;signatureErrorSupplier
@@ -25,13 +27,16 @@ spring:
 
 management:
   metrics:
-    tags:
-      app: server
-    export:
-      influx:
-        uri: http://localhost:8086
-        db: metrics
+    enable:
+      all: true
+  influx:
+    metrics:
+      export:
+        enabled: true
         step: 10s
+        bucket: scst
+        token: A4XPNzOdvdbJQudj0th08N-aNH65vdfzLlFS4YlNy9leoUPLzuKUmD7hoNKdieejs9CHd0eFWsM_9IDAmI9GWQ==
+        org: vmware
 
 message.signer:
   privateKey: MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCRe9U0ECQ96LcP3daS6dYEBYmyuRQQGd67EpecylvS2u5+Q9Ko4TPp6nYu1p9JPbSbRrxliVa8yUQbJm2VZ5q7raJmHBQzap49zRs51/NvS3gdpdCHS6H+qioG9PuWZXZ7O7FVINRa/PzSgVmAuRfmbK16DWEdYiEJ1+6hkN9PON2vI2unvryblmitA+eRDQhu3UV7joussdWAnZ2x6ruYuxlqJCavFnc05efTWlKDScGDRs4gVy02FiBZtu/29kje13n96OeK3FTMgtK6aIVN1SPaiOsfRNO4T6k1J/z8C685drZ/zMkS2bdiPiTcZOM3ZUciCM/DInGSE1jgPGnjAgMBAAECggEAZQ4ia5amxgYnWrMagFRDX+nE20tqH0EJEOL6Q2Pg4pdGwJg19S7xU5OUYjac0FA3awB4jwMWJ+6aC03nIrejqKgUvV7VvV1a68zUE5rosq82kUmDjuc/cFkc9lYniDGUWkd9h4dVWpqOt144IIzxiBKHcddnVPS7xE2kqb+rDih/w3X3kGBn8jqUBd5kyvQg9G+WDjVFJljpDjYBA/LuEmqEr7220s3i23DIpu5tAYdQb233yeIIJANbRQ4As2Nmmir7mSBIQT5k4bBY75+RlHovZvuuurtq8mksUAWMYsS/bvkVXUQaq9er2pelMJL+lh/L9JP2QwO8JzK5j9L/IQKBgQDgu50qyW0tAqeN8WG/btAvkAje8SQxpXjQwsBBuGek4Q24QKshzXbEUtgxYefpigDe3rwwHTv6DMuwPQoLW5n8HDm1XerBdxAwSLLUygWPmOGHDkCGZIcpe34Se/7tMwdM/1WZPhmpwiIGcLaJ2rF2Jb1pCxiwtTfkyN2BuwswsQKBgQCluZNRFEJ6D7L076My85L19qGMwPTLnUws9eFeGcH4j+pjfosSs3kfjOA+80nGV20rJftM4d3XZADV6CfaVgtZYzFjFv+keAcQtsb5Un9aE0sU4cUTC5s+wvkVmazOtTuYKfbkExm5WBf8D6WDPYjCaTezPHbZy4qsZW7EzcnI0wKBgGejPcywjW+XbMvRyGEu6kU06FJf5HAcvkWPunfUYb+wpdIVyJXTGfVZuyey3e9eXB5rm1+Y68LZyclhrNMmEDIqlhZk1FEZ5lZOAGKPM9dQCpls4ibYD1j7AV3m3t5mjPReQAxmjhEyXNyZeCTEvNgeeWYK3v0G5VrVowkjx/pRAoGAPpx2A9PbqbH0soU26zEK/NJJBpx/38110iazFpI0rmvw6dYNROt5f2oB7saLwNuW6w5Wex16ar3lcuta4ypO716CciVmQAT45l+nnNqGMsnHPARwKFniNTwETxzYJOBju4FfPZvZxCR8K0beCU9eM9T8rkLRxEcaBTftOX1mFvECgYBtCZe/AI/YeJj+PoaGeK8CXibV+fl0ivrHQFl9EWyZGcSTXDa6TTy//u0E8Me3mhSJYQBK0r8zus2XyJ3joZ4oqlCSM1yZPIz0EAgwkbovTZI/xFh8tNTueruPFl5u7jOuFOLzT2l1Lj5B1AgUcQ1zXg9A1rCgNyOG/uQQfow7dQ==

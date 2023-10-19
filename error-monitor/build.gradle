@@ -1,6 +1,6 @@
 plugins {
-    id "org.springframework.boot" version "2.5.4"
-    id 'com.google.cloud.tools.jib' version '3.1.4'
+    id "org.springframework.boot" version "3.1.4"
+    id 'com.google.cloud.tools.jib' version '3.4.0'
 }
 
 apply plugin: 'org.springframework.boot'
@@ -17,7 +17,7 @@ dependencies {
 jib {
     allowInsecureRegistries = true
     from {
-        image = "openjdk:11"
+        image = "openjdk:17"
     }
     to {
         image = "192.168.64.36:5000/scst-security-error-monitor"

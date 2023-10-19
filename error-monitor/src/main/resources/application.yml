@@ -2,6 +2,8 @@ server:
   port: 8304
 
 spring:
+  application:
+    name: error-monitor
   cloud:
     function:
       definition: jwtErrorConsumer;signatureErrorConsumer
@@ -18,8 +20,13 @@ spring:
 
 management:
   metrics:
-    export:
-      influx:
-        uri: http://localhost:8086
-        db: metrics
+    enable:
+      all: true
+  influx:
+    metrics:
+      export:
+        enabled: true
         step: 10s
+        bucket: scst
+        token: A4XPNzOdvdbJQudj0th08N-aNH65vdfzLlFS4YlNy9leoUPLzuKUmD7hoNKdieejs9CHd0eFWsM_9IDAmI9GWQ==
+        org: vmware
